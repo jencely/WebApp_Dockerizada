@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analizador de imagenes</title>
+    <style>
+        .image-container {
+            margin: 20px;
+            display: inline-block;
+            text-align: center;
+        }
+        img {
+            max-width: 300px;
+            margin: 10px;
+        }
+        .analysis-results {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Analyzer</h1>
+    <div class="images">
+        {% for image in images %}
+        <div class="image-container">
+            <img src="{{ image }}" alt="Image" data-filename="{{ image.split('/')[-1] }}">
+            <div class="analysis-results" id="results-{{ loop.index }}">
+                <!-- Results will go here -->
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <button onclick="analyzeImages()">Analizar</button>
+
+    <script>
+        function analyzeImages() {
+            document.querySelectorAll('img').forEach((img, index) => {
+                const filename = img.dataset.filename;
+                fetch(`/analyze/${filename}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const resultsDiv = document.getElementById(`results-${index + 1}`);
+                        resultsDiv.innerHTML = data.map(tag => 
+                            `${tag.tag.en} (${tag.confidence.toFixed(2)}%)`
+                        ).join('<br>');
+                    })
+                    .catch(error => console.error('Error:', error));
+            });
+        }
+    </script>
+</body>
+</html>
